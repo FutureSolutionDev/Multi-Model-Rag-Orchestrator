@@ -2,117 +2,113 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-**Maintained by Future Solutions Dev: Sabry Dawood**  
-
-بناء مرن لاستدعاء أكثر من 10 مزوّدين لنماذج الذكاء الاصطناعي مع دعم مدمج لـ **RAG** لفهرسة ومعالجة بياناتك.
-
-بناء مرن لاستدعاء أكثر من 10 مزوّدين لنماذج الذكاء الاصطناعي مع دعم مدمج لـ **RAG** لفهرسة ومعالجة بياناتك.
+**Maintained by Future Solutions Dev : Sabry Dawood**  
+Flexible orchestrator for 10+ AI model providers with built-in **RAG** for indexing and retrieving your data.
 
 ---
 
-## 🖼️ معاينة النظام
+## 🖼️ Preview
 
 ![Preview](Docs/Assets/Preview.png)
 
 ---
 
-## 🌐 اللغات
+## 🌐 Languages
 
-English | [English](Docs/README.en.md)
-
----
-
-## 🚀 نظرة عامة
-
-طبقة تنسيق ذكية تعمل فوق عدة مزوّدين (OpenAI, Anthropic, Gemini, Mistral, Cohere, Ollama, Groq, DeepSeek, xAI, Azure OpenAI)، تختار تلقائيًا أفضل مزوّد وفقًا لزمن الاستجابة والتكلفة.  
-تدعم:
-
-- راوتر ذكي مع استراتيجيات `failover`, `roundRobin`, `weighted`, `smart`
-- **RAG** مدمج مع متجر متجهات داخل الذاكرة أو قابل للاستبدال بـ pgvector/Pinecone
-- دوائر حماية (Circuit Breaker) + مهلات زمنية + إعادة محاولات
-- مقاييس الأداء والاستخدام (latency/tokens/cost)
-- قابلية توسعة سريعة بإضافة مزوّد جديد عبر Class صغيرة
+English | [العربية](Docs/README.ar.md)
 
 ---
 
-## 📦 التثبيت والتشغيل
+## 🚀 Overview
+
+A smart coordination layer running on top of multiple providers (OpenAI, Anthropic, Gemini, Mistral, Cohere, Ollama, Groq, DeepSeek, xAI, Azure OpenAI) that automatically selects the best provider based on latency and cost.  
+It supports:
+
+- Smart router with `failover`, `roundRobin`, `weighted`, `smart` strategies
+- **Built‑in RAG** with in‑memory vector store (swappable with pgvector/Pinecone)
+- Resilience (Circuit Breaker, timeouts, retries)
+- Usage metrics (latency/tokens/cost)
+- Easy extensibility — add a new provider with a small class
+
+---
+
+## 📦 Installation & Run
 
 ```bash
-cp .env.example .env   # أضف مفاتيح مزوّداتك
+cp .env.example .env   # Add your provider keys
 npm install
 npm run dev
-# يعمل على http://localhost:7070
+# Runs on http://localhost:7070
 ```
 
 ---
 
-## 🔌 نقاط الدخول (API Endpoints)
+## 🔌 API Endpoints
 
-| Method | Endpoint                     | وصف |
-|-------|------------------------------|-----|
-| GET   | `/`                          | يعرض صفحة index.html من مجلد public |
-| GET   | `/rag/health`                | فحص الصحة |
-| GET   | `/rag/debug/stats`           | عرض إحصائيات الفهرس (لأغراض التصحيح) |
-| POST  | `/rag/ingest/customer/:id`   | فهرسة بيانات عميل محدد |
-| POST  | `/rag/ingest/all`            | فهرسة جميع العملاء دفعة واحدة (يعرض عدد الناجح والفاشل) |
-| POST  | `/rag/query`                 | استعلام RAG مع خيارات مثل `top_k`, `language`, `customerId`, `provider`, `model` |
-
----
-
-## 🛠️ طريقة العمل (Internal Flow)
-
-1. استقبال السؤال وتوحيد صياغته  
-2. تحويله إلى متجه (Embedding)  
-3. البحث المتجهي (Top-K)  
-4. بناء السياق من أفضل المقاطع  
-5. توجيه الطلب لأفضل مزوّد وفق الاستراتيجية  
-6. توليد الإجابة  
-7. إرفاق المراجع والمقاييس  
-8. إرجاع النتيجة لواجهة الـ API أو الـ UI  
+| Method | Endpoint                     | Description |
+|-------|------------------------------|-------------|
+| GET   | `/`                          | Serves `index.html` from the public folder |
+| GET   | `/rag/health`                | Health check |
+| GET   | `/rag/debug/stats`           | View index stats (for debugging) |
+| POST  | `/rag/ingest/customer/:id`   | Ingest a specific customer's data |
+| POST  | `/rag/ingest/all`            | Ingest all customers (returns success/fail count) |
+| POST  | `/rag/query`                 | Query RAG with `top_k`, `language`, `customerId`, `provider`, `model` options |
 
 ---
 
-## 📚 فهرسة بياناتك
+## 🛠️ Internal Flow
 
-- قسم المستندات إلى مقاطع 500–1000 حرف بتداخل 50–150 حرف
-- أنشئ Embeddings وخزنها مع الميتاداتا (المصدر، التاريخ، التصنيف)
-- أعد فهرسة الأجزاء المتأثرة فقط عند التحديث
-- يمكن دعم لغات متعددة بإضافة حقول لغة للمساعدة في الاسترجاع
-
----
-
-## 🔐 الأمان والمراقبة
-
-- خزن مفاتيح الوصول في Secret Manager
-- لا تسجّل بيانات حساسة في الـ Logs
-- راقب الاستهلاك والزمن عبر OpenTelemetry أو pino + Grafana/ELK
+1. Receive question & normalize  
+2. Embed question → vector  
+3. Vector search (Top‑K)  
+4. Build context from top matches  
+5. Route request to best provider  
+6. Generate answer  
+7. Attach references & metrics  
+8. Return result to API/UI  
 
 ---
 
-## ⚡ تحسين الأداء
+## 📚 Data Indexing
 
-- استخدم Caching (مثل Redis) للسياقات والإجابات
-- نفذ Batch Embeddings لتقليل الاستدعاءات
-- استعمل pgvector أو Pinecone بدلاً من التخزين في الذاكرة عند الإنتاج
-- عدّل `k`, `temperature`, حجم المقاطع لتحسين جودة النتائج
-
----
-
-## ❓ أسئلة شائعة
-
-- **ماذا لو لا أملك كل المفاتيح؟** → سيعمل فقط بالمزوّدين المتاحين ويعطّل الباقي تلقائيًا  
-- **هل يمكن تشغيله بدون إنترنت؟** → نعم عبر Ollama محليًا  
-- **كيف أضيف مزوّد جديد؟** → أنشئ Class جديدة تنفذ `LLMProvider` وأضفها في `providers[]`  
+- Split documents into 500–1000 char chunks with 50–150 char overlap
+- Generate embeddings & store with metadata (source, date, category)
+- Re‑index only affected parts on updates
+- Optionally add language fields for multilingual search
 
 ---
 
-## 🧾 مثال سريع (TypeScript)
+## 🔐 Security & Monitoring
+
+- Store keys in a proper Secret Manager
+- Avoid logging sensitive data
+- Monitor latency & usage via OpenTelemetry or pino + Grafana/ELK
+
+---
+
+## ⚡ Performance Tips
+
+- Use caching (e.g. Redis) for contexts & answers
+- Batch embeddings to reduce API calls
+- Prefer pgvector/Pinecone for production instead of in‑memory store
+- Tune `k`, `temperature`, and chunk size for best results
+
+---
+
+## ❓ FAQ
+
+- **What if I don't have all API keys?** → Only available providers will be used, others auto‑disabled  
+- **Can I run offline?** → Yes, via Ollama locally  
+- **How do I add a new provider?** → Create a new class implementing `LLMProvider` and register it in `providers[]`  
+
+---
+
+## 🧾 Quick Example (TypeScript)
 
 ```ts
 import { Rag, Router, VectorStore } from "./Router";
-
 async function demo(){
-  // 1) Seed some knowledge
+  // 1) Seed knowledge
   await VectorStore.upsert([
     { id: 'doc-1', text: 'Our refund policy allows returns within 30 days of purchase for undamaged items.' },
     { id: 'doc-2', text: 'Support hours are Sunday to Thursday, 9:00 to 18:00 Africa/Cairo time.' },
@@ -120,31 +116,30 @@ async function demo(){
     { id: 'doc-4', text: 'Invoices are due within 14 days of issue date unless otherwise stated.' },
     { id: 'doc-5', text: 'KPI dashboard aggregates ContractHistories to compute on-time payment rates.' },
   ]);
-  // 2) Ask a question through RAG
-  const q = 'متى ينتهي عقد Future Solutions Dev وما هي القيمة الشهرية؟';
+
+  // 2) Ask question via RAG
+  const q = 'When does Future Solutions Dev contract end and what is the monthly fee?';
   const ans = await Rag.answer(q, { k: 4, temperature: 0.1 });
-  console.log('\n=== ANSWER (RAG via multi-model router) ===');
+  console.log('\\n=== ANSWER (RAG via multi-model router) ===');
   console.log({ output: ans.output, provider: ans.providerId, model: ans.model, refs: ans.references });
 
-  // 3) Raw chat (no RAG) using router
+  // 3) Direct chat without RAG
   const chat = await Router.generate([
     { role: 'system', content: 'You are an expert CTO assistant. Answer concisely.' },
     { role: 'user', content: 'Compare OpenAI and Anthropic briefly.' },
   ], { temperature: 0.3, maxTokens: 200 });
-  console.log('\n=== RAW CHAT (router) ===');
+  console.log('\\n=== RAW CHAT (router) ===');
   console.log(chat);
 }
 
-// Only run demo when invoked directly
 if (require.main === module) {
   demo().catch(e => { console.error(e); process.exit(1); });
 }
-
 ```
 
 ---
 
-## 📜 الترخيص
+## 📜 License
 
-هذا المشروع مرخّص تحت **[Apache License 2.0](./LICENSE)**  
-يمكنك استخدام الكود، تعديله، وإعادة توزيعه سواء لأغراض شخصية أو تجارية مع الحفاظ على الإسناد لـ Future Solutions Dev.
+This project is licensed under **[Apache License 2.0](./LICENSE)**  
+You are free to use, modify, and distribute this code (personal or commercial) as long as you keep attribution to Future Solutions Dev.
