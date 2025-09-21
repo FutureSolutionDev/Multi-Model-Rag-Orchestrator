@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nova Crm RAG Service Console</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header dir="ltr">
+        <div class="wrap Navbar ">
+            <h1>Nova Crm RAG Service Console <span class="pill">Dark</span></h1>
+            <span>Version 1.0</span>
+        </div>
+    </header>
+    <main class="wrap">
+        <div class="grid">
+            <section class="card">
+                <h2>الإعدادات</h2>
+                <label class="field-label has-tip" data-tip="ضع عنوان URL للخادم. يجب ان يبدا بhttp:// او https://.">
+                    Base URL (عنوان URL للخادم)
+                    <span class="tip-icon" aria-hidden="true">?</span>
+                </label>
+                <input id="baseUrl" value="http://localhost:7070" />
+
+                <div class="row">
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="اختَر اللغة للنموذج. يغيّر السرعة والدقة والتكلفة. اتركه فارغًا لاستخدام الافتراضي">
+                            اللغة
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <select id=" lang">
+                            <option value="auto">الافتراضي</option>
+                            <option value="ar">عربي</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="كم جزء هنجيبه من الذاكرة لسؤالك — كلما زادت القيمة زاد السياق وقد تزيد الضوضاء">Top
+                            K
+                            (عدد أفضل النتائج)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="topk" type="number" min="1" max="10" value="5" />
+                    </div>
+                    <div>
+                        <label class="field-label has-tip" data-tip="معرف العميل (اختياري)">Customer ID (معرف
+                            العميل)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="cid" type="number" placeholder="مثال: 123" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="اختَر الجهة المشغّلة للنموذج. يغيّر السرعة والدقة والتكلفة. اتركه فارغًا لاستخدام الإعداد الافتراضي">
+                            Provider (Adapter) - (المزوّد/الأدابتر)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <select id="provider">
+                            <option value="">الافتراضي ( OpenAi )</option>
+                            <option value="groq">Groq</option>
+                            <option value="openai">OpenAI ( ChatGPT )</option>
+                            <option value="anthropic">Anthropic ( Claude Ai )</option>
+                            <option value="google">Google ( Gemini )</option>
+                            <option value="mistral">Mistral</option>
+                            <option value="cohere">Cohere</option>
+                            <option value="ollama">Ollama ( Local )</option>
+                            <option value="deepseek">DeepSeek</option>
+                            <option value="xai">XAI ( Grok )</option>
+                            <option value="azure-openai">Azure OpenAI</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="اختَر اسم نموذج الذكاء من المزوّد المحدد — يؤثر على الدقة والسرعة والتكلفة">
+                            Model (اسم النموذج)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="model" placeholder="مثال: llama-3.1-70b-versatile أو gpt-4o-mini" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="أقصى طول للإجابة. قيمة صغيرة قد تقطع الرد؛ قيمة كبيرة تبطّئ وتزيد التكلفة">
+                            Max Tokens (حجم النتائج)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="maxTokens" type="number" min="64" max="4096" value="512" />
+                    </div>
+                    <div>
+                        <label class="field-label has-tip"
+                            data-tip="كلما زادت القيمة زاد التنوع والإبداع، وكلما انخفضت زادت الدقة والثبات">
+                            Temperature (درجة التنوع)
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="temperature" type="number" min="0" max="1" step="0.05" value="0.2" />
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <label class="field-label has-tip" data-tip="لو فشل المزود، لن نستخدم بديل وسنرجع خطأ.">
+                            Strict Provider ( استخدم المزود المحدد فقط )
+                            <span class="tip-icon" aria-hidden="true">?</span>
+                        </label>
+                        <input id="strict" type="checkbox" />
+                    </div>
+                </div>
+                <label class="field-label has-tip" data-tip="ضع سؤالك هنا">Question ( سؤالك )
+                    <span class="tip-icon" aria-hidden="true">?</span>
+                </label>
+                <textarea id="question"
+                    placeholder="اكتب سؤالك هنا... مثال: هل لدى العميل 123 فواتير متأخرة؟ وما أقرب تاريخ استحقاق؟"></textarea>
+
+                <div class="toolbar">
+                    <button class="btn" id="btnHealth">Health</button>
+                    <button class="btn ok" id="btnIngest">Ingest Customer</button>
+                    <button class="btn" id="btnStats">Debug Stats</button>
+                    <button class="btn primary" id="btnAsk">Ask</button>
+                    <span id="busy" class="spinner" style="display:none"></span>
+                </div>
+                <div class="muted mono" id="status"></div>
+            </section>
+
+            <section class="card">
+                <h2>النتيجة</h2>
+                <div id="result" class="result">
+                    <div class="muted">لا يوجد نتائج بعد.</div>
+                </div>
+            </section>
+        </div>
+        <section class="card" style="margin-top:5px">
+            <h2>Diagnostics</h2>
+            <div class="muted">يعرض ملخص الفهرس من </div>
+            <pre id="statsBox" class="mono"
+                style="margin-top:5px; white-space:pre-wrap; background:#0a1220; border:1px solid #1c2a3f; padding:12px; border-radius:12px; min-height:60px">لم يتم الفحص بعد.</pre>
+        </section>
+    </main>
+    <footer class="wrap muted" dir="ltr">
+        <div class="row">
+            <div>© RAG Console</div>
+            <div class="right mono" id="meta"></div>
+        </div>
+    </footer>
+    <script src="script.js"> </script>
+</body>
+
+</html>
